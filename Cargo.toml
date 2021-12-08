@@ -37,6 +37,7 @@ members = [
     "task/spd",
     "task/thermal",
     "task/spi-loopback",
+    "task/vsc7448",
 
     "drv/stm32fx-rcc",
     "drv/stm32fx-usart",
