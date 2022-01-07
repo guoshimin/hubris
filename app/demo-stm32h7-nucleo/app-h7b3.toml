@@ -178,4 +178,3 @@ controller = 4
 [[config.i2c.controllers.ports.D.pins]]
 pins = [ 12, 13 ]
 af = 4
-
