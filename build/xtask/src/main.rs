@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 use std::path::PathBuf;
+use std::collections::BTreeMap;
 
 use anyhow::Result;
 use structopt::StructOpt;
@@ -286,6 +287,8 @@ where
 struct Peripheral {
     address: u32,
     size: u32,
+    #[serde(default)]
+    interrupts: BTreeMap<String, u32>,
 }
 
 struct LoadSegment {
