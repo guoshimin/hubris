@@ -65,6 +65,27 @@ uses = ["gpios1", "gpios2", "gpios3"]
 start = true
 task-slots = ["rcc_driver"]
 
+[tasks.spi2_driver]
+path = "../../drv/stm32h7-spi-server"
+name = "drv-stm32h7-spi-server"
+priority = 2
+requires = {flash = 16384, ram = 4096}
+features = ["h753", "spi2"]
+uses = ["spi2"]
+start = true
+interrupts = {36 = 1}
+stacksize = 1000
+task-slots = ["gpio_driver", "rcc_driver"]
+
+[tasks.vsc7448]
+path = "../../task/vsc7448"
+name = "task-vsc7448"
+priority = 3
+requires = {flash = 65536, ram = 4096}
+stacksize = 2048
+start = true
+task-slots = [{ spi_driver = "spi2_driver" }]
+
 [tasks.i2c_driver]
 path = "../../drv/stm32h7-i2c-server"
 name = "drv-stm32h7-i2c-server"
@@ -180,7 +201,7 @@ pins = [ { gpio_port = "B", pins = [ 8, 9 ], af = 4 } ]
 # I2C2: Front I/O
 #
 [[config.i2c.controllers]]
-controller = 2 
+controller = 2
 
 #
 # I2C_FRONT_IO0_SCL
