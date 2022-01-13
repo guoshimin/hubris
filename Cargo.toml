@@ -70,6 +70,7 @@ members = [
     "drv/gimlet-seq-server",
     "drv/gimlet-hf-server",
     "drv/gimlet-hf-api",
+    "drv/vsc7448",
 
     "test/tests-gemini-bu",
     "test/tests-gemini-bu-rot",
