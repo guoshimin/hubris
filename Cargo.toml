@@ -33,14 +33,18 @@ members = [
     "task/pong",
     "task/idle",
     "task/hiffy",
+    "task/net",
+    "task/net-api",
     "task/power",
     "task/spd",
     "task/thermal",
     "task/spi-loopback",
+    "task/udpecho",
 
     "drv/stm32fx-rcc",
     "drv/stm32fx-usart",
 
+    "drv/stm32h7-eth",
     "drv/stm32h7-gpio",
     "drv/stm32h7-gpio-api",
     "drv/stm32h7-rcc",
