@@ -628,6 +628,52 @@ pub fn start_first_task(tick_divisor: u32, task: &task::Task) -> ! {
         }
     }
 
+    unsafe {
+        use ambiq_apollo3_pac::{CLKGEN, CTIMER};
+        let (clkgen, ctimer) = (&*CLKGEN::ptr(), &*CTIMER::ptr());
+        clkgen.octrl.modify(|_, w| w.stoprc().en());
+
+        // am_hal_ctimer_clear(0, AM_HAL_CTIMER_TIMERA);
+        ctimer.ctrl0.modify(|_, w| w.tmra0clr().clear().tmrb0clr().clear());
+
+        // am_hal_ctimer_config(0, &g_sTimer0);
+    //     am_hal_ctimer_config_t g_sTimer0 =
+    //     {
+    //         // Don't link timers.
+    //         0,  // ui32Link
+
+    //         // Set up Timer0A.
+    //         (AM_HAL_CTIMER_FN_REPEAT    |
+    //          AM_HAL_CTIMER_INT_ENABLE   |
+    //          #if USE_XTAL
+    //          AM_HAL_CTIMER_XT_256HZ),
+    //         #else
+    //         AM_HAL_CTIMER_LFRC_32HZ),  // ui32TimerAConfig
+    //     #endif
+
+    //     // No configuration for Timer0B.
+    //     0,  // ui32TimerBConfig
+    // };
+        //  ctimer_clr(ui32TimerNumber, AM_HAL_CTIMER_BOTH);
+        ctimer.ctrl0.write(
+            |w| w.tmra0fn().repeatedcount().tmra0ie0().en().tmra0clk()
+                .hfrc_div1024());
+                // .lfrc());
+        //     am_hal_ctimer_period_set(0, AM_HAL_CTIMER_TIMERA, ui32Period,
+        // (ui32Period >> 1));
+        // ctimer.ctrl0;
+        ctimer.cmpra0.write(|w| w.cmpr0a0().bits(48).cmpr1a0().bits(0));
+        // am_hal_ctimer_int_clear(AM_HAL_CTIMER_INT_TIMERA0);
+        ctimer.intclr.write(|w| w.ctmra0c0int().bit(true));
+        ctimer.inten.modify(|_, w| w.ctmra0c0int().bit(true));
+        // let nvic = &*cortex_m::peripheral::NVIC::ptr();
+        enable_irq(14);
+        // nvic.iser[0] |= 1 << 14;
+        // am_hal_ctimer_start(0, AM_HAL_CTIMER_TIMERA);
+        ctimer.ctrl0.modify(|_, w| w.tmra0clr().run().tmra0en().en());
+
+    }
+
     // Safety: this, too, is safe in practice but unsafe in API.
     unsafe {
         // Configure the timer.
@@ -638,6 +684,7 @@ pub fn start_first_task(tick_divisor: u32, task: &task::Task) -> ! {
         syst.cvr.write(0);
         // Enable counter and interrupt.
         syst.csr.modify(|v| v | 0b111);
+        // syst.csr.modify(|v| v | 0b011);
     }
     // We are manufacturing authority to interact with the MPU here, because we
     // can't thread a cortex-specific peripheral through an
@@ -833,8 +880,12 @@ pub unsafe extern "C" fn SysTick() {
     // there's no way this can preempt the kernel -- it will only preempt user
     // code. As a result, we can manufacture exclusive references to various
     // bits of kernel state.
-    let ticks = &mut TICKS;
-    with_task_table(|tasks| safe_sys_tick_handler(ticks, tasks));
+    // let ticks = &mut TICKS;
+    // use ambiq_apollo3_pac::GPIO;
+    // let gpio = &*GPIO::ptr();
+    // gpio.wtb
+    //     .write(|w| w.bits(0) );
+    // with_task_table(|tasks| safe_sys_tick_handler(ticks, tasks));
 }
 
 /// The meat of the systick handler, after we do the unsafe things.
@@ -925,6 +976,18 @@ unsafe extern "C" fn pendsv_entry() {
     });
 }
 
+unsafe fn ctimer_handler() {
+    use ambiq_apollo3_pac::CTIMER;
+    let ctimer = &*CTIMER::ptr();
+    ctimer.intclr.write(|w| w.ctmra0c0int().bit(true));
+    let ticks = &mut TICKS;
+    // use ambiq_apollo3_pac::GPIO;
+    // let gpio = &*GPIO::ptr();
+    // gpio.wtb
+    //     .modify(|r, w| w.bits(r.bits() ^ (1 << 14)) );
+    with_task_table(|tasks| safe_sys_tick_handler(ticks, tasks));
+}
+
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "C" fn DefaultHandler() {
@@ -953,6 +1016,11 @@ pub unsafe extern "C" fn DefaultHandler() {
         // 13 is currently reserved
         // 14=PendSV is handled above by its own handler
         // 15=SysTick is handled above by its own handler
+
+        // 30 (IRQ14, CTIMER)
+        30 => {
+            ctimer_handler()
+        }
         x if x > 16 => {
             // Hardware interrupt
             let irq_num = exception_num - 16;

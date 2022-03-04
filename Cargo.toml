@@ -16,6 +16,7 @@ members = [
     "lib/hypocalls",
     "lib/ringbuf",
 
+    "app/demo-sfe",
     "app/demo-stm32f4-discovery",
     "app/demo-stm32h7-nucleo",
     "app/gemini-bu",

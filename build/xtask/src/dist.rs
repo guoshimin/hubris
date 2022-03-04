@@ -1114,7 +1114,7 @@ fn allocate_all(
                 // The kernel wants in on this.
                 allocs.kernel.insert(
                     region.to_string(),
-                    allocate_one(region, sz, avail)?,
+                    allocate_one(region, sz, avail, true)?,
                 );
                 continue 'fitloop;
             }
@@ -1129,7 +1129,7 @@ fn allocate_all(
                             .or_default()
                             .insert(
                                 region.to_string(),
-                                allocate_one(region, sz, avail)?,
+                                allocate_one(region, sz, avail, false)?,
                             );
                         continue 'fitloop;
                     }
@@ -1144,7 +1144,7 @@ fn allocate_all(
                             .or_default()
                             .insert(
                                 region.to_string(),
-                                allocate_one(region, sz, avail)?,
+                                allocate_one(region, sz, avail, false)?,
                             );
                         continue 'fitloop;
                     }
@@ -1165,6 +1165,7 @@ fn allocate_one(
     region: &str,
     size: u32,
     avail: &mut Range<u32>,
+    start_from_start: bool,
 ) -> Result<Range<u32>> {
     // This condition is ensured by allocate_all.
     assert!(size.is_power_of_two());
@@ -1173,7 +1174,7 @@ fn allocate_one(
 
     // Our base address will be larger than avail.start if it doesn't meet our
     // minimum requirements. Round up.
-    let base = (avail.start + size_mask) & !size_mask;
+    let base = if start_from_start { avail.start } else { (avail.start + size_mask) & !size_mask };
 
     if base >= avail.end || size > avail.end - base {
         bail!(

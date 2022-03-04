@@ -42,7 +42,7 @@ enum Op {
 
 cfg_if::cfg_if! {
     // Target boards with 4 leds
-    if #[cfg(any(target_board = "gemini-bu-1", target_board = "gimletlet-2"))] {
+    if #[cfg(any(target_board = "gemini-bu-1", target_board = "gimletlet-2", target_board = "sfe"))] {
         #[derive(FromPrimitive)]
         enum Led {
             Zero = 0,
@@ -471,4 +471,116 @@ fn led_toggle(led: Led) {
 
     let pin = led_gpio_num(led);
     gpio_driver.toggle(pin).unwrap();
+}
+
+#[cfg(feature = "ambiq-apollo3-pac")]
+fn enable_led_pins() {
+    use ambiq_apollo3_pac::GPIO;
+    let gpio = unsafe { &*GPIO::ptr() };
+    gpio.encb
+        .write(|w| unsafe { w.encb().bits(1 << 14 | 1 << 5 | 1 << 15 | 1 << 12) });
+
+    gpio.padkey.write(|w| w.padkey().key());
+
+    gpio.padregj
+        .write(|w| w.pad37fncsel().gpio37().pad37strng().low());
+
+    gpio.padregl.write(|w| {
+        w.pad46fncsel()
+            .gpio46()
+            .pad46strng()
+            .low()
+            .pad47fncsel()
+            .gpio47()
+            .pad47strng()
+            .low()
+            .pad44fncsel()
+            .gpio44()
+            .pad44strng()
+            .low()
+    });
+
+    gpio.cfge.write(|w| w.gpio37outcfg().pushpull());
+    gpio.cfgf.write(|w| {
+        w.gpio46outcfg()
+            .pushpull()
+            .gpio47outcfg()
+            .pushpull()
+            .gpio44outcfg()
+            .pushpull()
+    });
+
+    gpio.padkey.write(|w| unsafe { w.bits(0) });
+}
+
+#[cfg(feature = "ambiq-apollo3-pac")]
+fn led_on(led: Led) {
+    use ambiq_apollo3_pac::GPIO;
+    let gpio = unsafe { &*GPIO::ptr() };
+    match led {
+        Led::Zero => {
+            gpio.wtsb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 14) })
+        }
+        Led::One => {
+            gpio.wtsb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 5) })
+        }
+        Led::Two => {
+            gpio.wtsb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 12) })
+        }
+        Led::Three => {
+            gpio.wtsb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 15) })
+        }
+    }
+}
+
+#[cfg(feature = "ambiq-apollo3-pac")]
+fn led_off(led: Led) {
+    use ambiq_apollo3_pac::GPIO;
+    let gpio = unsafe { &*GPIO::ptr() };
+    match led {
+        Led::Zero => {
+            gpio.wtcb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 14) })
+        }
+        Led::One => {
+            gpio.wtcb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 5) })
+        }
+        Led::Two => {
+            gpio.wtcb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 12) })
+        }
+        Led::Three => {
+            gpio.wtcb
+                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 15) })
+        }
+    }
+}
+
+#[cfg(feature = "ambiq-apollo3-pac")]
+fn led_toggle(led: Led) {
+    use ambiq_apollo3_pac::GPIO;
+    let gpio = unsafe { &*GPIO::ptr() };
+    match led {
+        Led::Zero => {
+            gpio.wtb
+                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 14) })
+        }
+        Led::One => {
+            gpio.wtb
+                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 5) })
+        }
+        Led::Two => {
+            gpio.wtb
+                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 12) })
+        }
+        Led::Three => {
+            gpio.wtb
+                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 15) })
+        }
+    }
 }
