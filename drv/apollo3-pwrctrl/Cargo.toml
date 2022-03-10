@@ -1,0 +1,27 @@
+[package]
+name = "drv-apollo3-pwrctrl"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+userlib = {path = "../../sys/userlib", features = ["panic-messages"]}
+# stm32f3 = { version = "0.13.0", optional = true, default-features = false }
+# stm32f4 = { version = "0.13.0", optional = true, default-features = false }
+ambiq-apollo3-pac = { version = "0.1.0", features = ["rt"], optional = true }
+zerocopy = "0.6.1"
+num-traits = { version = "0.2.12", default-features = false }
+
+[features]
+default = ["standalone"]
+standalone = ["ambiq-apollo3-pac"]
+
+# a target for `cargo xtask check`
+[package.metadata.build]
+target = "thumbv7em-none-eabihf"
+
+# This section is here to discourage RLS/rust-analyzer from doing test builds,
+# since test builds don't work for cross compilation.
+[[bin]]
+name = "drv-apollo3-pwrctrl"
+test = false
+bench = false

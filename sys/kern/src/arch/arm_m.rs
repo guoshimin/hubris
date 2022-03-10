@@ -634,35 +634,44 @@ pub fn start_first_task(tick_divisor: u32, task: &task::Task) -> ! {
         clkgen.octrl.modify(|_, w| w.stoprc().en());
 
         // am_hal_ctimer_clear(0, AM_HAL_CTIMER_TIMERA);
-        ctimer.ctrl0.modify(|_, w| w.tmra0clr().clear().tmrb0clr().clear());
+        ctimer
+            .ctrl0
+            .modify(|_, w| w.tmra0clr().clear().tmrb0clr().clear());
 
         // am_hal_ctimer_config(0, &g_sTimer0);
-    //     am_hal_ctimer_config_t g_sTimer0 =
-    //     {
-    //         // Don't link timers.
-    //         0,  // ui32Link
+        //     am_hal_ctimer_config_t g_sTimer0 =
+        //     {
+        //         // Don't link timers.
+        //         0,  // ui32Link
 
-    //         // Set up Timer0A.
-    //         (AM_HAL_CTIMER_FN_REPEAT    |
-    //          AM_HAL_CTIMER_INT_ENABLE   |
-    //          #if USE_XTAL
-    //          AM_HAL_CTIMER_XT_256HZ),
-    //         #else
-    //         AM_HAL_CTIMER_LFRC_32HZ),  // ui32TimerAConfig
-    //     #endif
+        //         // Set up Timer0A.
+        //         (AM_HAL_CTIMER_FN_REPEAT    |
+        //          AM_HAL_CTIMER_INT_ENABLE   |
+        //          #if USE_XTAL
+        //          AM_HAL_CTIMER_XT_256HZ),
+        //         #else
+        //         AM_HAL_CTIMER_LFRC_32HZ),  // ui32TimerAConfig
+        //     #endif
 
-    //     // No configuration for Timer0B.
-    //     0,  // ui32TimerBConfig
-    // };
+        //     // No configuration for Timer0B.
+        //     0,  // ui32TimerBConfig
+        // };
         //  ctimer_clr(ui32TimerNumber, AM_HAL_CTIMER_BOTH);
-        ctimer.ctrl0.write(
-            |w| w.tmra0fn().repeatedcount().tmra0ie0().en().tmra0clk()
-                .hfrc_div1024());
-                // .lfrc());
+        ctimer.ctrl0.write(|w| {
+            w.tmra0fn()
+                .repeatedcount()
+                .tmra0ie0()
+                .en()
+                .tmra0clk()
+                .hfrc_div1024()
+        });
+        // .lfrc());
         //     am_hal_ctimer_period_set(0, AM_HAL_CTIMER_TIMERA, ui32Period,
         // (ui32Period >> 1));
         // ctimer.ctrl0;
-        ctimer.cmpra0.write(|w| w.cmpr0a0().bits(48).cmpr1a0().bits(0));
+        ctimer
+            .cmpra0
+            .write(|w| w.cmpr0a0().bits(48).cmpr1a0().bits(0));
         // am_hal_ctimer_int_clear(AM_HAL_CTIMER_INT_TIMERA0);
         ctimer.intclr.write(|w| w.ctmra0c0int().bit(true));
         ctimer.inten.modify(|_, w| w.ctmra0c0int().bit(true));
@@ -670,8 +679,9 @@ pub fn start_first_task(tick_divisor: u32, task: &task::Task) -> ! {
         enable_irq(14);
         // nvic.iser[0] |= 1 << 14;
         // am_hal_ctimer_start(0, AM_HAL_CTIMER_TIMERA);
-        ctimer.ctrl0.modify(|_, w| w.tmra0clr().run().tmra0en().en());
-
+        ctimer
+            .ctrl0
+            .modify(|_, w| w.tmra0clr().run().tmra0en().en());
     }
 
     // Safety: this, too, is safe in practice but unsafe in API.
@@ -1018,9 +1028,7 @@ pub unsafe extern "C" fn DefaultHandler() {
         // 15=SysTick is handled above by its own handler
 
         // 30 (IRQ14, CTIMER)
-        30 => {
-            ctimer_handler()
-        }
+        30 => ctimer_handler(),
         x if x > 16 => {
             // Hardware interrupt
             let irq_num = exception_num - 16;

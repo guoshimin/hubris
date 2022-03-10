@@ -477,8 +477,9 @@ fn led_toggle(led: Led) {
 fn enable_led_pins() {
     use ambiq_apollo3_pac::GPIO;
     let gpio = unsafe { &*GPIO::ptr() };
-    gpio.encb
-        .write(|w| unsafe { w.encb().bits(1 << 14 | 1 << 5 | 1 << 15 | 1 << 12) });
+    gpio.encb.write(|w| unsafe {
+        w.encb().bits(1 << 14 | 1 << 5 | 1 << 15 | 1 << 12)
+    });
 
     gpio.padkey.write(|w| w.padkey().key());
 
@@ -518,22 +519,18 @@ fn led_on(led: Led) {
     use ambiq_apollo3_pac::GPIO;
     let gpio = unsafe { &*GPIO::ptr() };
     match led {
-        Led::Zero => {
-            gpio.wtsb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 14) })
-        }
-        Led::One => {
-            gpio.wtsb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 5) })
-        }
-        Led::Two => {
-            gpio.wtsb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 12) })
-        }
-        Led::Three => {
-            gpio.wtsb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 15) })
-        }
+        Led::Zero => gpio
+            .wtsb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 14) }),
+        Led::One => gpio
+            .wtsb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 5) }),
+        Led::Two => gpio
+            .wtsb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 12) }),
+        Led::Three => gpio
+            .wtsb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 15) }),
     }
 }
 
@@ -542,22 +539,18 @@ fn led_off(led: Led) {
     use ambiq_apollo3_pac::GPIO;
     let gpio = unsafe { &*GPIO::ptr() };
     match led {
-        Led::Zero => {
-            gpio.wtcb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 14) })
-        }
-        Led::One => {
-            gpio.wtcb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 5) })
-        }
-        Led::Two => {
-            gpio.wtcb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 12) })
-        }
-        Led::Three => {
-            gpio.wtcb
-                .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 15) })
-        }
+        Led::Zero => gpio
+            .wtcb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 14) }),
+        Led::One => gpio
+            .wtcb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 5) }),
+        Led::Two => gpio
+            .wtcb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 12) }),
+        Led::Three => gpio
+            .wtcb
+            .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 15) }),
     }
 }
 
@@ -566,21 +559,17 @@ fn led_toggle(led: Led) {
     use ambiq_apollo3_pac::GPIO;
     let gpio = unsafe { &*GPIO::ptr() };
     match led {
-        Led::Zero => {
-            gpio.wtb
-                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 14) })
-        }
+        Led::Zero => gpio
+            .wtb
+            .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 14) }),
         Led::One => {
-            gpio.wtb
-                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 5) })
+            gpio.wtb.modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 5) })
         }
-        Led::Two => {
-            gpio.wtb
-                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 12) })
-        }
-        Led::Three => {
-            gpio.wtb
-                .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 15) })
-        }
+        Led::Two => gpio
+            .wtb
+            .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 12) }),
+        Led::Three => gpio
+            .wtb
+            .modify(|r, w| unsafe { w.bits(r.bits() ^ 1 << 15) }),
     }
 }

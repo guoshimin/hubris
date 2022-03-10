@@ -18,17 +18,19 @@ extern crate panic_semihosting; // requires a debugger
 
 // We have to do this if we don't otherwise use it to ensure its vector table
 // gets linked in.
+#[cfg(feature = "ambiq-apollo3-pac")]
+extern crate ambiq_apollo3_pac;
 #[cfg(feature = "stm32f3")]
 extern crate stm32f3;
 #[cfg(feature = "stm32f4")]
 extern crate stm32f4;
-#[cfg(feature = "ambiq-apollo3-pac")]
-extern crate ambiq_apollo3_pac;
-use ambiq_apollo3_pac::{CLKGEN, MCUCTRL, PWRCTRL, cachectrl, CACHECTRL, GPIO, clkgen::clkkey};
+use ambiq_apollo3_pac::{
+    cachectrl, clkgen::clkkey, CACHECTRL, CLKGEN, GPIO, MCUCTRL, PWRCTRL,
+};
 
+use cortex_m::peripheral;
 use cortex_m_rt::entry;
 use kern::app::App;
-use cortex_m::peripheral;
 
 extern "C" {
     static hubris_app_table: App;
@@ -63,7 +65,6 @@ fn init() {
     //     .simobuck4
     //     .modify(|r, w| unsafe { w.bits(r.bits() & !(1_u32 << 24)) });
 
-
     // cachectrl
     //     .cachecfg
     //     .modify(|_, w| w.dcache_enable().clear_bit().icache_enable().clear_bit());
@@ -88,7 +89,8 @@ fn init() {
     //         .set_bit()
     // });
     // cachectrl.cachecfg.modify(|_, w| w.enable().set_bit());
-    let (gpio, cachectrl, clkgen) = unsafe { (&*GPIO::ptr(), &*CACHECTRL::ptr(), &*CLKGEN::ptr()) };
+    let (gpio, cachectrl, clkgen) =
+        unsafe { (&*GPIO::ptr(), &*CACHECTRL::ptr(), &*CLKGEN::ptr()) };
     let pwrctrl = unsafe { &*PWRCTRL::ptr() };
     let mcuctrl = unsafe { &*MCUCTRL::ptr() };
 
@@ -99,13 +101,12 @@ fn init() {
         w
     });
 
-    cachectrl
-        .cachecfg
-        .modify(|_, w| w.dcache_enable().clear_bit().icache_enable().clear_bit());
+    cachectrl.cachecfg.modify(|_, w| {
+        w.dcache_enable().clear_bit().icache_enable().clear_bit()
+    });
     cachectrl.cachecfg.write(|w| {
         w.enable()
             .clear_bit()
-
             .cache_clkgate()
             .set_bit()
             .cache_ls()
@@ -138,8 +139,9 @@ fn init() {
 
     clkgen.octrl.modify(|_, w| w.stopxt().stop());
 
-    gpio.encb
-        .write(|w| unsafe { w.encb().bits(1 << 14 | 1 << 5 | 1 << 15 | 1 << 12) });
+    gpio.encb.write(|w| unsafe {
+        w.encb().bits(1 << 14 | 1 << 5 | 1 << 15 | 1 << 12)
+    });
 
     gpio.padkey.write(|w| w.padkey().key());
 

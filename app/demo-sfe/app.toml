@@ -44,35 +44,28 @@ start = true
 features = ["itm"]
 stacksize = 1536
 
-# [tasks.rcc_driver]
-# path = "../../drv/stm32fx-rcc"
-# name = "drv-stm32fx-rcc"
-# features = ["f4"]
-# priority = 1
-# requires = {flash = 8192, ram = 1024}
-# uses = ["rcc"]
-# start = true
+[tasks.pwrctrl_driver]
+path = "../../drv/apollo3-pwrctrl"
+name = "drv-apollo3-pwrctrl"
+features = ["ambiq-apollo3-pac"]
+priority = 1
+requires = {flash = 8192, ram = 1024}
+uses = ["pwrctrl"]
+start = true
 
-# [tasks.usart_driver]
-# path = "../../drv/stm32fx-usart"
-# name = "drv-stm32fx-usart"
-# features = ["stm32f4"]
-# priority = 2
-# requires = {flash = 16384, ram = 1024}
+
+[tasks.usart_driver]
+path = "../../drv/apollo3-usart"
+name = "drv-apollo3-usart"
+features = ["ambiq-apollo3-pac"]
+priority = 2
+requires = {flash = 16384, ram = 1024}
 # uses = ["usart2", "gpioa"]
-# start = true
-# interrupts = {38 = 1}
-# task-slots = ["rcc_driver"]
+uses = ["uart0", "gpio"]
+start = true
+interrupts = {15 = 1}
+task-slots = ["pwrctrl_driver"]
 
-# [tasks.user_leds]
-# path = "../../drv/user-leds"
-# name = "drv-user-leds"
-# features = ["stm32f4"]
-# priority = 2
-# requires = {flash = 16384, ram = 1024}
-# uses = ["gpiod"]
-# start = true
-# task-slots = ["rcc_driver"]
 [tasks.user_leds]
 path = "../../drv/user-leds"
 name = "drv-user-leds"
@@ -81,17 +74,16 @@ priority = 2
 requires = {flash = 16384, ram = 1024}
 uses = ["gpio"]
 start = true
-# task-slots = ["rcc_driver"]
 
-# [tasks.ping]
-# path = "../../task/ping"
-# name = "task-ping"
-# features = ["uart"]
-# priority = 4
-# requires = {flash = 8192, ram = 512}
-# stacksize = 512
-# start = true
-# task-slots = [{peer = "pong"}, "usart_driver"]
+[tasks.ping]
+path = "../../task/ping"
+name = "task-ping"
+features = ["uart"]
+priority = 4
+requires = {flash = 8192, ram = 512}
+stacksize = 512
+start = true
+task-slots = [{peer = "pong"}, "usart_driver"]
 
 [tasks.pong]
 path = "../../task/pong"
@@ -120,6 +112,9 @@ start = true
 # [peripherals.usart2]
 # address = 0x40004400
 # size = 1024
+[peripherals.uart0]
+address = 0x4001C000
+size = 0x400
 
 # [peripherals.rcc]
 # address = 0x40023800
@@ -135,3 +130,7 @@ start = true
 [peripherals.gpio]
 address = 0x40010000
 size = 0x400
+
+[peripherals.pwrctrl]
+address = 0x40021000
+size = 0x40

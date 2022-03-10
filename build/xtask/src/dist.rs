@@ -1174,7 +1174,11 @@ fn allocate_one(
 
     // Our base address will be larger than avail.start if it doesn't meet our
     // minimum requirements. Round up.
-    let base = if start_from_start { avail.start } else { (avail.start + size_mask) & !size_mask };
+    let base = if start_from_start {
+        avail.start
+    } else {
+        (avail.start + size_mask) & !size_mask
+    };
 
     if base >= avail.end || size > avail.end - base {
         bail!(

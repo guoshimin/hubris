@@ -583,6 +583,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "drv-apollo3-pwrctrl"
+version = "0.1.0"
+dependencies = [
+ "ambiq-apollo3-pac",
+ "num-traits",
+ "userlib",
+ "zerocopy",
+]
+
+[[package]]
+name = "drv-apollo3-usart"
+version = "0.1.0"
+dependencies = [
+ "ambiq-apollo3-pac",
+ "num-traits",
+ "userlib",
+ "zerocopy",
+]
+
+[[package]]
 name = "drv-gimlet-hf-api"
 version = "0.1.0"
 dependencies = [
