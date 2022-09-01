@@ -43,6 +43,8 @@ fn init() {
     if scb.vtor.read() != 0xc000 {
         return;
     }
+		let mut cp = cortex_m::Peripherals::take().unwrap();
+
     // let (clkgen, mcuctrl, pwrctrl, cachectrl) = unsafe { (&*CLKGEN::ptr(), &*MCUCTRL::ptr(), &*PWRCTRL::ptr(), &*CACHECTRL::ptr()) };
 
     // // Set the clock frequency.
@@ -136,6 +138,8 @@ fn init() {
     mcuctrl
         .simobuck4
         .modify(|r, w| unsafe { w.bits(r.bits() | 1 << 24) });
+
+		cp.DCB.enable_trace();
 
     clkgen.octrl.modify(|_, w| w.stopxt().stop());
 

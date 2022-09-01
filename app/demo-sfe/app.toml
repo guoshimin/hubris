@@ -66,6 +66,17 @@ start = true
 interrupts = {15 = 1}
 task-slots = ["pwrctrl_driver"]
 
+[tasks.itm_driver]
+path = "../../drv/apollo3-itm"
+name = "drv-apollo3-itm"
+features = ["ambiq-apollo3-pac"]
+priority = 2
+requires = {flash = 16384, ram = 1024}
+# uses = ["uart0", "gpio"]
+start = true
+# interrupts = {15 = 1}
+# task-slots = ["pwrctrl_driver"]
+
 [tasks.user_leds]
 path = "../../drv/user-leds"
 name = "drv-user-leds"

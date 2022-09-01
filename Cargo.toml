@@ -38,6 +38,7 @@ members = [
     "task/spd",
     "task/thermal",
 
+    "drv/apollo3-itm",
     "drv/apollo3-pwrctrl",
     "drv/apollo3-usart",
     "drv/stm32fx-rcc",
